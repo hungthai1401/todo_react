@@ -10,7 +10,8 @@ class App extends Component {
     super(props);
     this.state = {
       tasks: [],
-      isCreate: false
+      isCreate: false,
+      task: null
     }
   }
 
@@ -31,9 +32,17 @@ class App extends Component {
 
   // toggle create task form
   toggleCreateTask = () => {
-    this.setState({
-      isCreate: !this.state.isCreate
-    })
+    if (this.state.isCreate && this.state.task) {
+      this.setState({
+        isCreate: true,
+        task: null
+      })
+    } else {
+      this.setState({
+        isCreate: !this.state.isCreate,
+        task: null
+      })
+    }
   };
 
   // close create task form
@@ -43,15 +52,34 @@ class App extends Component {
     })
   };
 
+  // find task by id
+  findTaskById = (id) => {
+    let { tasks } = this.state;
+    let result = -1;
+    tasks.forEach((task, index) => {
+      if (task.id === id) {
+        result = index;
+      }
+    });
+
+    return result;
+  };
+
   // handle submit on children component
   onSubmit = (data) => {
     let { tasks } = this.state;
-    let task = {
-      id: this.generateUUID(),
-      name: data.name,
-      status: data.status === 'true' ? true : false
-    };
-    tasks.push(task);
+    if (data.id) {
+      let index = this.findTaskById(data.id);
+      tasks[index] = data;
+    } else {
+      let task = {
+        id: this.generateUUID(),
+        name: data.name,
+        status: data.status
+      };
+      tasks.push(task);
+    }
+
     this.setState({
       tasks: tasks
     });
@@ -59,11 +87,56 @@ class App extends Component {
     Storage.save('tasks', JSON.stringify(tasks));
   };
 
+  // event pass to props children component
+  onUpdateStatus = (id) => {
+    let { tasks } = this.state;
+    let index = this.findTaskById(id);
+    if (index !== -1) {
+      tasks[index].status = !tasks[index].status;
+      this.setState({
+        tasks: tasks
+      });
+      Storage.save('tasks', JSON.stringify(tasks));
+    }
+  };
+
+  // open update task form
+  onOpenUpdateTask = () => {
+    this.setState({
+      isCreate: true
+    });
+  };
+
+  // update task
+  onUpdate = (id) => {
+    let { tasks } = this.state;
+    let index = this.findTaskById(id);
+    this.setState({
+      task: tasks[index]
+    });
+    this.onOpenUpdateTask();
+  };
+
+  // delete task
+  onDelete = (id) => {
+    let { tasks } = this.state;
+    let index = this.findTaskById(id);
+    if (index !== -1) {
+      tasks.splice(index, 1);
+      this.setState({
+        tasks: tasks
+      });
+      Storage.save('tasks', JSON.stringify(tasks));
+    }
+  };
+
   render() {
-    let { tasks, isCreate } = this.state; // let task = this.state.tasks
-    const createTask = isCreate ? <CreateTask
-      onSubmit={ this.onSubmit }
-      onCloseCreateTask={ this.onCloseCreateTask } /> : null;
+    let { tasks, isCreate, task } = this.state; // let task = this.state.tasks
+    const createTask = isCreate ?
+      <CreateTask
+        onSubmit={ this.onSubmit }
+        onCloseCreateTask={ this.onCloseCreateTask }
+        task={ task } /> : null;
     return (
       <div className="container">
         <div className="text-center">
@@ -82,7 +155,11 @@ class App extends Component {
               <span className="fa fa-plus mr-2"></span>Thêm Công Việc
             </button>
             <TaskControl />
-            <Tasks tasks={ tasks } />
+            <Tasks
+              tasks={ tasks }
+              onUpdate={ this.onUpdate }
+              onUpdateStatus={ this.onUpdateStatus }
+              onDelete={ this.onDelete } />
           </div>
         </div>
       </div>

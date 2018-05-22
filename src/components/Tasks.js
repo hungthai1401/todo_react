@@ -2,9 +2,19 @@ import React, {Component} from 'react';
 import Task from './Task';
 
 class Tasks extends Component {
-  constructor(props) {
-    super(props);
-  }
+
+  onUpdateStatus = (id) => {
+    this.props.onUpdateStatus(id);
+  };
+
+  onUpdate = (id) => {
+    this.props.onUpdate(id);
+  };
+
+  // function props in parent component
+  onDelete = (id) => {
+    this.props.onDelete(id);
+  };
 
   render() {
     let { tasks } = this.props;
@@ -12,8 +22,11 @@ class Tasks extends Component {
       (task, index) => {
         return <Task
           key={ task.id }
-          index={ index }
-          task={ task } />
+          index={ index + 1 }
+          task={ task }
+          onUpdateStatus={ this.onUpdateStatus }
+          onUpdate={ this.onUpdate }
+          onDelete={ this.onDelete } />
       }
     );
     return (

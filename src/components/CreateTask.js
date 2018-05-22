@@ -4,10 +4,40 @@ class CreateTask extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      id: '',
       name: '',
       status: false
     };
   };
+
+  // event when component mount
+  componentWillMount() {
+    let { task } = this.props;
+    if (task) {
+      this.setState({
+        id: task.id,
+        name: task.name,
+        status: task.status
+      });
+    }
+  }
+
+  // event when component receive props
+  componentWillReceiveProps(nextProps) {
+    if (nextProps && nextProps.task) {
+      this.setState({
+        id: nextProps.task.id,
+        name: nextProps.task.name,
+        status: nextProps.task.status
+      });
+    } else if (!nextProps.task) {
+      this.setState({
+        id: '',
+        name: '',
+        status: false
+      });
+    }
+  }
 
   // close task
   onCloseCreateTask = () => {
@@ -19,6 +49,9 @@ class CreateTask extends Component {
     let target = event.target;
     let name = target.name;
     let value = target.value;
+    if (name === 'status') {
+      value = value === 'true' ? true : false;
+    }
     this.setState({
       [name]: value
     })
@@ -41,10 +74,11 @@ class CreateTask extends Component {
   };
 
   render() {
+    let { id } = this.state;
     return (
       <div className="panel panel-warning">
         <div className="panel-heading">
-          <h3 className="panel-title">Thêm Công Việc
+          <h3 className="panel-title">{ id ? 'Cập nhật công việc' : 'Thêm Công Việc' }
             <span
             className="fa fa-times-circle text-right"
             onClick={ this.onCloseCreateTask }>
@@ -74,7 +108,7 @@ class CreateTask extends Component {
             </select>
             <br/>
             <div className="text-center">
-              <button type="submit" className="btn btn-warning">Thêm</button>
+              <button type="submit" className="btn btn-warning">{ id ? 'Cập nhật' : 'Thêm' }</button>
               &nbsp;
               <button
                 type="button"
