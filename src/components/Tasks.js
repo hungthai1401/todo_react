@@ -4,6 +4,9 @@ import Task from './Task';
 class Tasks extends Component {
   constructor(props) {
     super(props);
+  }
+
+  render() {
     let { tasks } = this.props;
     this.tasks = tasks.map(
       (task, index) => {
@@ -12,10 +15,7 @@ class Tasks extends Component {
           index={ index }
           task={ task } />
       }
-    )
-  }
-
-  render() {
+    );
     return (
       <div className="row mt-15">
         <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">

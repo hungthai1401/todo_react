@@ -20,8 +20,8 @@ class Task extends Component {
     let { label, status } = this.generateStatus(task.status);
     return (
       <tr>
-        <td>{ index }</td>
-        <td>{ task.name }</td>
+        <td className="text-center">{ index }</td>
+        <td className="text-center">{ task.name }</td>
         <td className="text-center">
           <span className={ label }>
             { status }
