@@ -3,6 +3,14 @@ import Task from './Task';
 
 class Tasks extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterName: '',
+      filterStatus: -1 // -1:all, 0:deactive, 1:active
+    }
+  }
+
   onUpdateStatus = (id) => {
     this.props.onUpdateStatus(id);
   };
@@ -14,6 +22,20 @@ class Tasks extends Component {
   // function props in parent component
   onDelete = (id) => {
     this.props.onDelete(id);
+  };
+
+  // event handle change filter input
+  onChange = (event) => {
+    let target = event.target;
+    let name = target.name;
+    let value = target.value;
+    this.props.onFilter(
+      name === 'filterName' ? value : this.state.filterName,
+      name === 'filterStatus' ? value : this.state.filterStatus
+    );
+    this.setState({
+      [name]: value
+    });
   };
 
   render() {
@@ -45,10 +67,10 @@ class Tasks extends Component {
             <tr>
               <td></td>
               <td>
-                <input type="text" className="form-control"/>
+                <input type="text" className="form-control" name="filterName" value={ this.state.filterName } onChange={ this.onChange } />
               </td>
               <td>
-                <select className="form-control">
+                <select className="form-control" name="filterStatus" value={ this.state.filterStatus } onChange={ this.onChange } >
                   <option value="-1">Tất Cả</option>
                   <option value="0">Ẩn</option>
                   <option value="1">Kích Hoạt</option>

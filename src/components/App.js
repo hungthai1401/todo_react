@@ -3,6 +3,7 @@ import CreateTask from './CreateTask';
 import TaskControl from './TaskControl';
 import Tasks from './Tasks';
 import uuid from 'uuid';
+import _ from 'lodash';
 import Storage from '../utils/Storage';
 
 class App extends Component {
@@ -11,7 +12,14 @@ class App extends Component {
     this.state = {
       tasks: [],
       isCreate: false,
-      task: null
+      task: null,
+      filter: {
+        name: '',
+        status: -1
+      },
+      search: {
+        name: ''
+      }
     }
   }
 
@@ -55,11 +63,8 @@ class App extends Component {
   // find task by id
   findTaskById = (id) => {
     let { tasks } = this.state;
-    let result = -1;
-    tasks.forEach((task, index) => {
-      if (task.id === id) {
-        result = index;
-      }
+    let result = _.findIndex(tasks, (task) => {
+      return task.id === id;
     });
 
     return result;
@@ -77,6 +82,7 @@ class App extends Component {
         name: data.name,
         status: data.status
       };
+
       tasks.push(task);
     }
 
@@ -130,8 +136,50 @@ class App extends Component {
     }
   };
 
+  // pass to props of children component
+  onFilter = (filterName, filterStatus) => {
+    filterStatus = parseInt(filterStatus, 10);
+    this.setState({
+      filter: {
+        name: filterName,
+        status: filterStatus
+      }
+    });
+  };
+
+  onSearch = (searchName) => {
+    searchName = searchName.toLowerCase();
+    this.setState({
+      search: {
+        name: searchName
+      }
+    });
+  };
+
   render() {
-    let { tasks, isCreate, task } = this.state; // let task = this.state.tasks
+    let { tasks, isCreate, task, filter, search } = this.state; // let task = this.state.tasks
+
+    // filter
+    if (filter.name) {
+      tasks = _.filter(tasks, (task) => {
+        return task.name.toLocaleLowerCase().indexOf(filter.name.toLocaleLowerCase()) !== -1;
+      });
+    }
+
+    tasks = _.filter(tasks, (task) => {
+      if (filter.status === -1) {
+        return tasks;
+      }
+
+      return task.status === Boolean(filter.status);
+    });
+
+    if (search.name) {
+      tasks = _.filter(tasks, (task) => {
+        return task.name.toLocaleLowerCase().indexOf(search.name) !== -1;
+      });
+    }
+
     const createTask = isCreate ?
       <CreateTask
         onSubmit={ this.onSubmit }
@@ -154,12 +202,14 @@ class App extends Component {
               onClick={ this.toggleCreateTask } >
               <span className="fa fa-plus mr-2"></span>Thêm Công Việc
             </button>
-            <TaskControl />
+            <TaskControl
+              onSearch={ this.onSearch } />
             <Tasks
               tasks={ tasks }
               onUpdate={ this.onUpdate }
               onUpdateStatus={ this.onUpdateStatus }
-              onDelete={ this.onDelete } />
+              onDelete={ this.onDelete }
+              onFilter={ this.onFilter } />
           </div>
         </div>
       </div>
